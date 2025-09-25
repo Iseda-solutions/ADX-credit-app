@@ -18,6 +18,7 @@ model User {
   dateOfBirth DateTime
   phone       String          @unique
   address     String
+  role        UserRole        @default(USER)
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 

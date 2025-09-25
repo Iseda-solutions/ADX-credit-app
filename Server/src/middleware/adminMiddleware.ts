@@ -1,11 +1,8 @@
+// src/middleware/adminMiddleware.ts
 import prisma from "../config/db.js";
 import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "./authMiddleware.js";
 
-/**
- * Checks if the authenticated user is an admin.
- * Assumes your User model has a 'role' field (e.g. 'USER' or 'ADMIN').
- */
 export async function adminMiddleware(
   req: AuthRequest,
   res: Response,
@@ -15,12 +12,9 @@ export async function adminMiddleware(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: req.user.id },
-    select: { role: true },
-  });
-
-  if (!user || user.role !== "ADMIN") {
+  // ADMIN_IDS is a comma-separated list of user IDs who are admins
+  const adminIds = (process.env.ADMIN_IDS || "").split(",");
+  if (!adminIds.includes(req.user.id)) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
