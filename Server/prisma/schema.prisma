@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+  // comment out "output" if you want the default @prisma/client import
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String          @id @default(uuid())
+  email       String          @unique
+  password    String
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  phone       String          @unique
+  address     String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  kycProfile       KYCProfile?
+  loanApplications LoanApplication[]
+  repayments       Repayment[]
+  disbursements    Disbursement[]
+}
+
+model KYCProfile {
+  userId       String   @id
+  nin          String   @unique
+  bvn          String   @unique
+  documentType String   // e.g. "passport", "id_card"
+  status       KYCStatus @default(PENDING)
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model LoanApplication {
+  id          String    @id @default(uuid())
+  userId      String
+  amount      Float
+  termMonths  Int
+  status      LoanStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id])
+  repayments  Repayment[]
+  disbursements Disbursement[]
+}
+
+model Repayment {
+  id          String   @id @default(uuid())
+  userId      String
+  loanId      String
+  amount      Float
+  paymentDate DateTime @default(now())
+  method      String   // e.g. "bank_transfer", "card"
+  reference   String   @unique
+
+  user        User             @relation(fields: [userId], references: [id])
+  loan        LoanApplication  @relation(fields: [loanId], references: [id])
+}
+
+model Disbursement {
+  id          String   @id @default(uuid())
+  userId      String
+  loanId      String
+  amount      Float
+  disbursedAt DateTime @default(now())
+  method      String   // e.g. "bank_transfer"
+  reference   String   @unique
+
+  user        User             @relation(fields: [userId], references: [id])
+  loan        LoanApplication  @relation(fields: [loanId], references: [id])
+}
+
+enum LoanStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  REPAID
+}
+
+enum KYCStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
