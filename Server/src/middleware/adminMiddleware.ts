@@ -2,7 +2,7 @@
 import prisma from "../config/db.js";
 import type { NextFunction, Response } from "express";
 import type { AuthRequest } from "./authMiddleware.js";
-
+import { UserRole } from "@prisma/client";
 export async function adminMiddleware(
   req: AuthRequest,
   res: Response,
@@ -12,9 +12,13 @@ export async function adminMiddleware(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // ADMIN_IDS is a comma-separated list of user IDs who are admins
-  const adminIds = (process.env.ADMIN_IDS || "").split(",");
-  if (!adminIds.includes(req.user.id)) {
+  // Look up the user's role
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id },
+    select: { role: true },
+  });
+
+  if (!user || user.role !== "ADMIN") {
     return res.status(403).json({ error: "Forbidden" });
   }
 

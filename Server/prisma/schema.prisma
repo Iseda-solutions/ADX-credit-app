@@ -91,3 +91,9 @@ enum KYCStatus {
   APPROVED
   REJECTED
 }
+
+enum UserRole {
+  USER
+  ADMIN
+}
+ 

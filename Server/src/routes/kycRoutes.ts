@@ -1,7 +1,7 @@
 import { Router } from "express";
 import prisma from "../config/db.js";
 import { authMiddleware, type AuthRequest } from "../middleware/authMiddleware.js";
-
+import { KYCStatus } from "@prisma/client";
 const router = Router();
 
 /**
@@ -33,7 +33,7 @@ router.post("/kyc", authMiddleware, async (req: AuthRequest, res, next) => {
           nin,
           bvn,
           documentType,
-          status: "PENDING", // you can set logic later
+          status: KYCStatus.PENDING, // you can set logic later
         },
       });
     } else {
@@ -44,7 +44,7 @@ router.post("/kyc", authMiddleware, async (req: AuthRequest, res, next) => {
           nin,
           bvn,
           documentType,
-          status: "PENDING",
+          status: KYCStatus.PENDING,
         },
       });
     }
